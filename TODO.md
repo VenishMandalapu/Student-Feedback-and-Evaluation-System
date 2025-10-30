@@ -1,7 +1,7 @@
-# TODO: Convert to PostgreSQL Environment
+# TODO: Add Attractive Landing Page Before Role Selection
 
-- [x] Update Backend/prisma/schema.prisma to PostgreSQL
-- [ ] Run prisma generate (manual)
-- [ ] Run prisma migrate dev --name init (manual)
-- [ ] Update DATABASE_URL in .env (manual)
-- [ ] Test the application (manual)
+## Steps to Complete:
+- [x] Create Frontend/src/components/LandingPage.tsx with an attractive, academic-themed design including a "Get Started" button that navigates to role-selection.
+- [x] Update Frontend/src/context/AppContext.tsx to set initial currentPage to 'landing'.
+- [x] Update Frontend/src/App.tsx to add a case for 'landing' that renders <LandingPage />.
+- [ ] Test the frontend by running the development server to ensure the landing page displays correctly and navigation works.
