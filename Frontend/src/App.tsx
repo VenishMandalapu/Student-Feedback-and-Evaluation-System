@@ -1,5 +1,10 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './store';
 import { AppProvider, useApp } from './context/AppContext';
+import { useSelector } from 'react-redux';
+import type { RootState } from './store';
 import LandingPage from './components/LandingPage';
 import RoleSelection from './components/RoleSelection';
 import Login from './components/Login';
@@ -34,78 +39,177 @@ import Reports from './components/admin/Reports';
 import StudentManagement from './components/admin/StudentManagement';
 
 const AppContent: React.FC = () => {
-  const { currentPage, currentUser } = useApp();
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
-  if (currentPage === 'landing') {
-    return <LandingPage />;
-  }
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/role-selection" element={<RoleSelection />} />
+      <Route path="/login" element={<Login />} />
 
-  if (currentPage === 'role-selection') {
-    return <RoleSelection />;
-  }
+      {/* Protected Student Routes */}
+      <Route path="/student/dashboard" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <StudentDashboard />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/student/give-feedback" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <GiveFeedback />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/student/view-results" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <ViewResults />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/student/deadlines" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <Deadlines />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/student/my-courses" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <MyCourses />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/student/settings" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <StudentSettings />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
 
-  if (currentPage === 'login') {
-    return <Login />;
-  }
+      {/* Protected Teacher Routes */}
+      <Route path="/teacher/dashboard" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <TeacherDashboard />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/teacher/courses" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <TeacherCourses />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/teacher/feedback-results" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <FeedbackResults />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/teacher/improvement-suggestions" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <ImprovementSuggestions />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/teacher/student-insights" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <StudentInsights />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/teacher/settings" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <TeacherSettings />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
 
-  if (!currentUser) {
-    return <RoleSelection />;
-  }
+      {/* Protected Admin Routes */}
+      <Route path="/admin/dashboard" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <AdminDashboard />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/faculty-management" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <FacultyManagement />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/course-management" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <CourseManagement />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/feedback-forms" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <FeedbackForms />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/analytics" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <Analytics />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/reports" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <Reports />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/student-management" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <StudentManagement />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/settings" element={
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <DashboardLayout>
+            <AdminSettings />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
 
-  const renderPage = () => {
-    switch (currentPage) {
-      // Student Pages
-      case 'student-dashboard':
-        return <StudentDashboard />;
-      case 'student-settings':
-        return <StudentSettings />;
-      case 'give-feedback':
-        return <GiveFeedback />;
-      case 'view-results':
-        return <ViewResults />;
-      case 'deadlines':
-        return <Deadlines />;
-      case 'my-courses':
-        return <MyCourses />;
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+};
 
-      // Teacher Pages
-      case 'teacher-dashboard':
-        return <TeacherDashboard />;
-      case 'teacher-settings':
-        return <TeacherSettings />;
-      case 'teacher-courses':
-        return <TeacherCourses />;
-      case 'feedback-results':
-        return <FeedbackResults />;
-      case 'improvement-suggestions':
-        return <ImprovementSuggestions />;
-      case 'student-performance':
-        return <StudentInsights />;
+const ProtectedRoute: React.FC<{ children: React.ReactNode; isAuthenticated: boolean }> = ({
+  children,
+  isAuthenticated
+}) => {
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+};
 
-      // Admin Pages
-      case 'admin-dashboard':
-        return <AdminDashboard />;
-      case 'admin-settings':
-        return <AdminSettings />;
-      case 'faculty-management':
-        return <FacultyManagement />;
-      case 'course-management':
-        return <CourseManagement />;
-      case 'feedback-forms':
-        return <FeedbackForms />;
-      case 'analytics':
-        return <Analytics />;
-      case 'decision-making':
-        return <DecisionMaking />;
-      case 'reports':
-        return <Reports />;
-      case 'student-management':
-        return <StudentManagement />;
+const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
-      default:
-        return <div>Page not found</div>;
-    }
-  };
+  if (!currentUser) return null;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -113,7 +217,7 @@ const AppContent: React.FC = () => {
       <div className="flex-1 ml-64">
         <Header />
         <main className="pt-20 p-8">
-          {renderPage()}
+          {children}
         </main>
       </div>
     </div>
@@ -122,9 +226,13 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <Provider store={store}>
+      <AppProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AppProvider>
+    </Provider>
   );
 }
 
