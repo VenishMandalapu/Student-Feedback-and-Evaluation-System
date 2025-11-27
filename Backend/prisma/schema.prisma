@@ -1,0 +1,180 @@
+// Prisma Schema for Student Feedback System
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User model (for authentication)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  student Student?
+  teacher Teacher?
+  admin   Admin?
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+// Student model
+model Student {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  name       String
+  email      String   @unique
+  rollNo     String   @unique
+  department String
+  year       Int
+  semester   Int
+  performance Float   @default(0)
+  attendance  Float   @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user            User              @relation(fields: [userId], references: [id])
+  enrollments     Enrollment[]
+  feedbackSubmissions FeedbackSubmission[]
+}
+
+// Teacher model
+model Teacher {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  name       String
+  email      String   @unique
+  department String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id])
+  courses Course[]
+}
+
+// Admin model
+model Admin {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+}
+
+// Course model
+model Course {
+  id         String   @id @default(cuid())
+  name       String
+  code       String   @unique
+  department String
+  year       Int
+  semester   String
+  academicYear Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  teachers    Teacher[]
+  enrollments Enrollment[]
+  feedbackForms FeedbackForm[]
+}
+
+// Enrollment (Student-Course relationship)
+model Enrollment {
+  id        String   @id @default(cuid())
+  studentId String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  student Student @relation(fields: [studentId], references: [id])
+  course  Course  @relation(fields: [courseId], references: [id])
+
+  @@unique([studentId, courseId])
+}
+
+// Feedback Form model
+model FeedbackForm {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  isActive  Boolean  @default(true)
+  deadline  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  course    Course     @relation(fields: [courseId], references: [id])
+  questions Question[]
+  submissions FeedbackSubmission[]
+}
+
+// Question model
+model Question {
+  id             String       @id @default(cuid())
+  feedbackFormId String
+  type           QuestionType
+  question       String
+  required       Boolean      @default(true)
+  order          Int
+  createdAt      DateTime     @default(now())
+
+  // Relations
+  feedbackForm FeedbackForm @relation(fields: [feedbackFormId], references: [id])
+  answers      Answer[]
+}
+
+enum QuestionType {
+  RATING
+  TEXT
+  SLIDER
+  MULTIPLE_CHOICE
+}
+
+// Feedback Submission model
+model FeedbackSubmission {
+  id             String   @id @default(cuid())
+  feedbackFormId String
+  studentId      String
+  submittedAt    DateTime @default(now())
+
+  // Relations
+  feedbackForm FeedbackForm @relation(fields: [feedbackFormId], references: [id])
+  student      Student      @relation(fields: [studentId], references: [id])
+  answers      Answer[]
+
+  @@unique([feedbackFormId, studentId])
+}
+
+// Answer model
+model Answer {
+  id           String   @id @default(cuid())
+  submissionId String
+  questionId   String
+  value        String
+  createdAt    DateTime @default(now())
+
+  // Relations
+  submission FeedbackSubmission @relation(fields: [submissionId], references: [id])
+  question   Question           @relation(fields: [questionId], references: [id])
+}
